@@ -9,19 +9,27 @@ import {
     Table,
     Text,
     Title,
-    SimpleGrid
+    SimpleGrid,
+    SegmentedControl
 } from "@mantine/core";
 
-import { getLeaderboardRequest } from "../services/leaderboard.service";
+import {
+    getLeaderboardRequest,
+    getGroupStageLeaderboardRequest
+} from "../services/leaderboard.service";
 import { useAuth } from "../../../app/providers/AuthProvider";
 
 const LeaderboardPage = () => {
     const [leaderboard, setLeaderboard] = useState([]);
     const [loading, setLoading] = useState(true);
     const { user } = useAuth();
+    const [groupStageLeaderboard, setGroupStageLeaderboard] = useState(null);
+    const [selectedMatchday, setSelectedMatchday] = useState("matchday1");
 
     useEffect(() => {
         const loadLeaderboard = async () => {
+            const groupStageData = await getGroupStageLeaderboardRequest();
+            setGroupStageLeaderboard(groupStageData);
             try {
                 const data = await getLeaderboardRequest();
                 setLeaderboard(data.leaderboard);
@@ -109,6 +117,77 @@ const LeaderboardPage = () => {
                         ))}
                     </Table.Tbody>
                 </Table>
+            </Card>
+
+            <Card withBorder radius="md" padding="lg">
+                <Stack>
+                    <div>
+                        <Title order={2}>Premios por jornada</Title>
+                        <Text c="dimmed">
+                            Rankings de la fase de grupos según los premios definidos.
+                        </Text>
+                    </div>
+
+                    <SegmentedControl
+                        value={selectedMatchday}
+                        onChange={setSelectedMatchday}
+                        data={[
+                            { label: "Jornada 1", value: "matchday1" },
+                            { label: "Jornada 2", value: "matchday2" },
+                            { label: "Jornada 3", value: "matchday3" }
+                        ]}
+                    />
+
+                    <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
+                        <Card withBorder radius="md" padding="md">
+                            <Title order={3}>🏆 Más puntos</Title>
+
+                            {groupStageLeaderboard?.[selectedMatchday]?.byPoints?.length > 0 ? (
+                                <Stack mt="md">
+                                    {groupStageLeaderboard[selectedMatchday].byPoints.map((player) => (
+                                        <Group key={player.id} justify="space-between">
+                                            <Text fw={600}>
+                                                #{player.position} {player.name}
+                                            </Text>
+
+                                            <Badge variant="light">
+                                                {player.points} pts
+                                            </Badge>
+                                        </Group>
+                                    ))}
+                                </Stack>
+                            ) : (
+                                <Text c="dimmed" mt="md">
+                                    Todavía no hay resultados calculados para esta jornada.
+                                </Text>
+                            )}
+                        </Card>
+
+                        <Card withBorder radius="md" padding="md">
+                            <Title order={3}>🎯 Más exactos</Title>
+
+                            {groupStageLeaderboard?.[selectedMatchday]?.byExactResults?.length > 0 ? (
+                                <Stack mt="md">
+                                    {groupStageLeaderboard[selectedMatchday].byExactResults.map((player) => (
+                                        <Group key={player.id} justify="space-between">
+                                            <Text fw={600}>
+                                                #{player.position} {player.name}
+                                            </Text>
+
+                                            <Badge variant="light">
+                                                {player.exactResults} exactos
+                                            </Badge>
+                                        </Group>
+                                    ))}
+                                </Stack>
+                            ) : (
+                                <Text c="dimmed" mt="md">
+                                    Todavía no hay resultados calculados para esta jornada.
+                                </Text>
+                            )}
+                        </Card>
+                    </SimpleGrid>
+                </Stack>
             </Card>
 
             <Stack hiddenFrom="sm">
