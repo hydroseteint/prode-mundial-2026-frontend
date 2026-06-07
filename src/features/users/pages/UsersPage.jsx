@@ -3,12 +3,14 @@ import {
     Badge,
     Button,
     Card,
+    Group,
     Loader,
     Modal,
     PasswordInput,
     Select,
     Stack,
     Table,
+    Text,
     TextInput,
     Title
 } from "@mantine/core";
@@ -175,7 +177,7 @@ const UsersPage = () => {
                 </form>
             </Modal>
 
-            <Card withBorder>
+            <Card withBorder visibleFrom="sm">
                 <Table striped>
                     <Table.Thead>
                         <Table.Tr>
@@ -199,6 +201,7 @@ const UsersPage = () => {
                                         {user.isActive ? "Activo" : "Inactivo"}
                                     </Badge>
                                 </Table.Td>
+
                                 <Table.Td>
                                     <Button
                                         size="xs"
@@ -211,9 +214,7 @@ const UsersPage = () => {
                                                 } al usuario ${user.name}?`
                                             );
 
-                                            if (!confirmed) {
-                                                return;
-                                            }
+                                            if (!confirmed) return;
 
                                             handleToggleStatus(user._id);
                                         }}
@@ -226,6 +227,54 @@ const UsersPage = () => {
                     </Table.Tbody>
                 </Table>
             </Card>
+
+            <Stack hiddenFrom="sm">
+                {users.map((user) => (
+                    <Card key={user._id} withBorder radius="md" padding="md">
+                        <Stack gap="xs">
+                            <Group justify="space-between" align="flex-start">
+                                <div>
+                                    <Text fw={700} size="lg">
+                                        {user.name}
+                                    </Text>
+
+                                    <Text size="sm" c="dimmed">
+                                        Usuario: {user.username}
+                                    </Text>
+                                </div>
+
+                                <Badge color={user.isActive ? "green" : "red"}>
+                                    {user.isActive ? "Activo" : "Inactivo"}
+                                </Badge>
+                            </Group>
+
+                            <Text size="sm">
+                                Rol: {user.role === "admin" ? "Administrador" : "Participante"}
+                            </Text>
+
+                            <Button
+                                fullWidth
+                                color={user.isActive ? "red" : "green"}
+                                variant="light"
+                                mt="sm"
+                                onClick={() => {
+                                    const confirmed = window.confirm(
+                                        `¿Estás seguro de ${
+                                            user.isActive ? "desactivar" : "activar"
+                                        } al usuario ${user.name}?`
+                                    );
+
+                                    if (!confirmed) return;
+
+                                    handleToggleStatus(user._id);
+                                }}
+                            >
+                                {user.isActive ? "Desactivar" : "Activar"}
+                            </Button>
+                        </Stack>
+                    </Card>
+                ))}
+            </Stack>
         </Stack>
     );
 };
