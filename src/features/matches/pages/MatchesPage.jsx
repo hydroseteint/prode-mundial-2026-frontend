@@ -4,20 +4,35 @@ import { Center, Loader, Stack, Text, Title, SegmentedControl, Select, Paginatio
 import { getMatchesWithPredictionsRequest } from "../services/matches.service";
 import MatchCard from "../components/MatchCard";
 
+const journeyOptions = [
+    { label: "Todas las jornadas", value: "all" },
+    { label: "Jornada 1", value: "matchday-1" },
+    { label: "Jornada 2", value: "matchday-2" },
+    { label: "Jornada 3", value: "matchday-3" },
+    { label: "Eliminatorias", value: "knockout" },
+];
+
 const MatchesPage = () => {
     const [matches, setMatches] = useState([]);
+    const [total, setTotal] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState("all");
     const [journeyFilter, setJourneyFilter] = useState("all");
     const [activePage, setActivePage] = useState(1);
 
-    const matchesPerPage = 10;
-
     useEffect(() => {
         const loadMatches = async () => {
+            setLoading(true);
             try {
-                const data = await getMatchesWithPredictionsRequest();
+                const data = await getMatchesWithPredictionsRequest({
+                    page: activePage,
+                    status: statusFilter,
+                    journey: journeyFilter,
+                });
                 setMatches(data.matches);
+                setTotal(data.total);
+                setTotalPages(data.totalPages);
             } catch (error) {
                 console.log(error);
             } finally {
@@ -26,99 +41,33 @@ const MatchesPage = () => {
         };
 
         loadMatches();
-    }, []);
+    }, [activePage, statusFilter, journeyFilter]);
 
-    useEffect(() => {
+    const handleStatusChange = (value) => {
+        setStatusFilter(value);
         setActivePage(1);
-    }, [statusFilter, journeyFilter]);
+    };
 
-    if (loading) {
-        return (
-            <Center h={300}>
-                <Loader size="lg" />
-            </Center>
-        );
-    }
-
-    const journeyOptions = [
-        { label: "Todas las jornadas", value: "all" },
-        { label: "Jornada 1", value: "matchday-1" },
-        { label: "Jornada 2", value: "matchday-2" },
-        { label: "Jornada 3", value: "matchday-3" },
-        { label: "Eliminatorias", value: "knockout" }
-    ];
-
-    const filteredMatches = matches.filter((match) => {
-        const matchesStatus = (() => {
-            if (statusFilter === "all") return true;
-
-            if (statusFilter === "pending") {
-                return !match.prediction && !match.predictionClosed;
-            }
-
-            if (statusFilter === "predicted") {
-                return match.prediction && !match.predictionClosed;
-            }
-
-            if (statusFilter === "closed") {
-                return match.predictionClosed;
-            }
-
-            return true;
-        })();
-
-        const matchesJourney = (() => {
-            if (journeyFilter === "all") return true;
-
-            if (journeyFilter === "matchday-1") {
-                return match.stage === "GROUP_STAGE" && match.matchday === 1;
-            }
-
-            if (journeyFilter === "matchday-2") {
-                return match.stage === "GROUP_STAGE" && match.matchday === 2;
-            }
-
-            if (journeyFilter === "matchday-3") {
-                return match.stage === "GROUP_STAGE" && match.matchday === 3;
-            }
-
-            if (journeyFilter === "knockout") {
-                return match.stage !== "GROUP_STAGE";
-            }
-
-            return true;
-        })();
-
-        return matchesStatus && matchesJourney;
-    });
-
-      const totalPages = Math.ceil(filteredMatches.length / matchesPerPage);
-
-      const paginatedMatches = filteredMatches.slice(
-          (activePage - 1) * matchesPerPage,
-          activePage * matchesPerPage
-      );
+    const handleJourneyChange = (value) => {
+        setJourneyFilter(value);
+        setActivePage(1);
+    };
 
     return (
-      <Stack>
+        <Stack>
+            <Title order={1}>Partidos y predicciones</Title>
 
-          <Title order={1}>
-              Partidos y predicciones
-          </Title>
+            <Text c="dimmed">{total} partidos encontrados</Text>
 
-          <Text c="dimmed">
-              {matches.length} partidos encontrados
-          </Text>
-
-          <SegmentedControl
+            <SegmentedControl
                 visibleFrom="sm"
                 value={statusFilter}
-                onChange={setStatusFilter}
+                onChange={handleStatusChange}
                 data={[
                     { label: "Todos", value: "all" },
                     { label: "Pendientes", value: "pending" },
                     { label: "Pronosticados", value: "predicted" },
-                    { label: "Cerrados", value: "closed" }
+                    { label: "Cerrados", value: "closed" },
                 ]}
             />
 
@@ -126,44 +75,45 @@ const MatchesPage = () => {
                 hiddenFrom="sm"
                 label="Filtrar por estado"
                 value={statusFilter}
-                onChange={setStatusFilter}
+                onChange={handleStatusChange}
                 data={[
                     { label: "Todos", value: "all" },
                     { label: "Pendientes", value: "pending" },
                     { label: "Pronosticados", value: "predicted" },
-                    { label: "Cerrados", value: "closed" }
+                    { label: "Cerrados", value: "closed" },
                 ]}
             />
 
             <Select
                 label="Filtrar por jornada"
                 value={journeyFilter}
-                onChange={setJourneyFilter}
+                onChange={handleJourneyChange}
                 data={journeyOptions}
                 w={260}
             />
 
-          {paginatedMatches.map((match) => (
-              <MatchCard
-                  key={match._id}
-                  match={match}
-              />
-          ))}
+            {loading ? (
+                <Center h={300}>
+                    <Loader size="lg" />
+                </Center>
+            ) : (
+                matches.map((match) => (
+                    <MatchCard key={match._id} match={match} />
+                ))
+            )}
 
-          {totalPages > 1 && (
-              <Pagination
-                hiddenFrom="sm"
-                size="md"
-                siblings={0}
-                boundaries={1}
-                total={totalPages}
-                value={activePage}
-                onChange={setActivePage}
-              />
-          )}
-
-      </Stack>
-  );
+            {totalPages > 1 && (
+                <Pagination
+                    size="md"
+                    siblings={0}
+                    boundaries={1}
+                    total={totalPages}
+                    value={activePage}
+                    onChange={setActivePage}
+                />
+            )}
+        </Stack>
+    );
 };
 
 export default MatchesPage;
