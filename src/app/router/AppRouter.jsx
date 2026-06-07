@@ -8,6 +8,7 @@ import MatchesPage from "../../features/matches/pages/MatchesPage";
 import LeaderboardPage from "../../features/leaderboard/pages/LeaderboardPage";
 import RulesPage from "../../features/rules/pages/RulesPage";
 import ProfilePage from "../../features/profile/pages/ProfilePage";
+import UsersPage from "../../features/users/pages/UsersPage";
 import ProtectedRoute from "../../shared/components/ProtectedRoute"
 
 const AppRouter = () => {
@@ -25,6 +26,7 @@ const AppRouter = () => {
                 <Route path="/leaderboard" element={<LeaderboardPage />} />
                 <Route path="/rules" element={<RulesPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/users" element={<UsersPage />} />
               </Route>
             </Route>
         </Routes>

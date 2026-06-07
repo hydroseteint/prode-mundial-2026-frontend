@@ -1,5 +1,5 @@
 import { AppShell, NavLink, Group, Text, Box, Image, Burger } from "@mantine/core"
-import {IconHome, IconBallFootball, IconTrophy, IconFileText, IconUser, IconLogout } from "@tabler/icons-react"
+import {IconHome, IconBallFootball, IconTrophy, IconFileText, IconUser, IconLogout, IconUsers } from "@tabler/icons-react"
 import { Outlet, useLocation, useNavigate } from "react-router-dom"
 import { useDisclosure } from "@mantine/hooks";
 
@@ -10,7 +10,7 @@ const AppLayout = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [opened, { toggle }] = useDisclosure();
-    const { logout } = useAuth();
+    const { user, logout } = useAuth();
 
     const handleLogout = async () => {
         await logout();
@@ -42,7 +42,16 @@ const AppLayout = () => {
             label: "Mi perfil",
             path: "/profile",
             icon: IconUser
-        }
+        },
+        ...(user?.role === "admin"
+            ? [
+                {
+                    label: "Usuarios",
+                    path: "/users",
+                    icon: IconUsers
+                }
+            ]
+            : [])
     ];
 
     return (

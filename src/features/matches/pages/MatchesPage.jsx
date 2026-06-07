@@ -8,7 +8,7 @@ const MatchesPage = () => {
     const [matches, setMatches] = useState([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState("all");
-    const [groupFilter, setGroupFilter] = useState("all");
+    const [journeyFilter, setJourneyFilter] = useState("all");
     const [activePage, setActivePage] = useState(1);
 
     const matchesPerPage = 10;
@@ -29,8 +29,8 @@ const MatchesPage = () => {
     }, []);
 
     useEffect(() => {
-          setActivePage(1);
-      }, [statusFilter, groupFilter]);
+        setActivePage(1);
+    }, [statusFilter, journeyFilter]);
 
     if (loading) {
         return (
@@ -40,40 +40,57 @@ const MatchesPage = () => {
         );
     }
 
-    const groupOptions = [
-          { label: "Todos los grupos", value: "all" },
-          ...Array.from(new Set(matches.map((match) => match.group)))
-              .filter(Boolean)
-              .map((group) => ({
-                  label: group.replace("GROUP_", "Grupo "),
-                  value: group
-              }))
-      ];
+    const journeyOptions = [
+        { label: "Todas las jornadas", value: "all" },
+        { label: "Jornada 1", value: "matchday-1" },
+        { label: "Jornada 2", value: "matchday-2" },
+        { label: "Jornada 3", value: "matchday-3" },
+        { label: "Eliminatorias", value: "knockout" }
+    ];
 
     const filteredMatches = matches.filter((match) => {
-          const matchesStatus = (() => {
-              if (statusFilter === "all") return true;
+        const matchesStatus = (() => {
+            if (statusFilter === "all") return true;
 
-              if (statusFilter === "pending") {
-                  return !match.prediction && !match.predictionClosed;
-              }
+            if (statusFilter === "pending") {
+                return !match.prediction && !match.predictionClosed;
+            }
 
-              if (statusFilter === "predicted") {
-                  return match.prediction && !match.predictionClosed;
-              }
+            if (statusFilter === "predicted") {
+                return match.prediction && !match.predictionClosed;
+            }
 
-              if (statusFilter === "closed") {
-                  return match.predictionClosed;
-              }
+            if (statusFilter === "closed") {
+                return match.predictionClosed;
+            }
 
-              return true;
-          })();
+            return true;
+        })();
 
-          const matchesGroup =
-              groupFilter === "all" || match.group === groupFilter;
+        const matchesJourney = (() => {
+            if (journeyFilter === "all") return true;
 
-          return matchesStatus && matchesGroup;
-      });
+            if (journeyFilter === "matchday-1") {
+                return match.stage === "GROUP_STAGE" && match.matchday === 1;
+            }
+
+            if (journeyFilter === "matchday-2") {
+                return match.stage === "GROUP_STAGE" && match.matchday === 2;
+            }
+
+            if (journeyFilter === "matchday-3") {
+                return match.stage === "GROUP_STAGE" && match.matchday === 3;
+            }
+
+            if (journeyFilter === "knockout") {
+                return match.stage !== "GROUP_STAGE";
+            }
+
+            return true;
+        })();
+
+        return matchesStatus && matchesJourney;
+    });
 
       const totalPages = Math.ceil(filteredMatches.length / matchesPerPage);
 
@@ -119,12 +136,12 @@ const MatchesPage = () => {
             />
 
             <Select
-              label="Filtrar por grupo"
-              value={groupFilter}
-              onChange={setGroupFilter}
-              data={groupOptions}
-              w={260}
-          />
+                label="Filtrar por jornada"
+                value={journeyFilter}
+                onChange={setJourneyFilter}
+                data={journeyOptions}
+                w={260}
+            />
 
           {paginatedMatches.map((match) => (
               <MatchCard
