@@ -10,25 +10,32 @@ export const AuthProvider = ({children}) => {
     const login = async (credentials) => {
         const data = await loginRequest(credentials);
 
+        localStorage.setItem("token", data.token);
         setUser(data.user);
 
         return data;
     }
 
     const checkAuth = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            setLoading(false);
+            return;
+        }
         try {
             const data = await currentRequest();
-
             setUser(data.user);
         } catch (error) {
+            localStorage.removeItem("token");
             setUser(null);
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
     };
 
     const logout = async () => {
         await logoutRequest();
+        localStorage.removeItem("token");
         setUser(null);
     };
 

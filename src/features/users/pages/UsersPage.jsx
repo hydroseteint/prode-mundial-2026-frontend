@@ -20,7 +20,8 @@ import { notifications } from "@mantine/notifications";
 import {
     getUsersRequest,
     createUserRequest,
-    toggleUserStatusRequest
+    toggleUserStatusRequest,
+    updateUserRequest
 } from "../services/users.service";
 
 const UsersPage = () => {
@@ -28,6 +29,11 @@ const UsersPage = () => {
     const [loading, setLoading] = useState(true);
     const [creating, setCreating] = useState(false);
     const [opened, { open, close }] = useDisclosure(false);
+
+    const [passwordModalOpened, { open: openPasswordModal, close: closePasswordModal }] = useDisclosure(false);
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [passwordData, setPasswordData] = useState({ password: "", confirm: "" });
+    const [changingPassword, setChangingPassword] = useState(false);
 
     const [formData, setFormData] = useState({
         name: "",
@@ -92,6 +98,44 @@ const UsersPage = () => {
             });
         } finally {
             setCreating(false);
+        }
+    };
+
+    const handleOpenPasswordModal = (user) => {
+        setSelectedUser(user);
+        setPasswordData({ password: "", confirm: "" });
+        openPasswordModal();
+    };
+
+    const handleChangePassword = async (event) => {
+        event.preventDefault();
+
+        if (passwordData.password !== passwordData.confirm) {
+            notifications.show({
+                title: "Error",
+                message: "Las contraseñas no coinciden",
+                color: "red"
+            });
+            return;
+        }
+
+        try {
+            setChangingPassword(true);
+            await updateUserRequest(selectedUser._id, { password: passwordData.password });
+            notifications.show({
+                title: "Contraseña actualizada",
+                message: `La contraseña de ${selectedUser.name} fue actualizada correctamente`,
+                color: "green"
+            });
+            closePasswordModal();
+        } catch (error) {
+            notifications.show({
+                title: "Error",
+                message: error.response?.data?.message || "No se pudo actualizar la contraseña",
+                color: "red"
+            });
+        } finally {
+            setChangingPassword(false);
         }
     };
 
@@ -177,6 +221,28 @@ const UsersPage = () => {
                 </form>
             </Modal>
 
+            <Modal opened={passwordModalOpened} onClose={closePasswordModal} title={`Cambiar contraseña — ${selectedUser?.name}`} centered>
+                <form onSubmit={handleChangePassword}>
+                    <Stack>
+                        <PasswordInput
+                            label="Nueva contraseña"
+                            value={passwordData.password}
+                            onChange={(e) => setPasswordData({ ...passwordData, password: e.target.value })}
+                            required
+                        />
+                        <PasswordInput
+                            label="Confirmar contraseña"
+                            value={passwordData.confirm}
+                            onChange={(e) => setPasswordData({ ...passwordData, confirm: e.target.value })}
+                            required
+                        />
+                        <Button type="submit" loading={changingPassword}>
+                            Guardar
+                        </Button>
+                    </Stack>
+                </form>
+            </Modal>
+
             <Card withBorder visibleFrom="sm">
                 <Table striped>
                     <Table.Thead>
@@ -203,24 +269,34 @@ const UsersPage = () => {
                                 </Table.Td>
 
                                 <Table.Td>
-                                    <Button
-                                        size="xs"
-                                        color={user.isActive ? "red" : "green"}
-                                        variant="light"
-                                        onClick={() => {
-                                            const confirmed = window.confirm(
-                                                `¿Estás seguro de ${
-                                                    user.isActive ? "desactivar" : "activar"
-                                                } al usuario ${user.name}?`
-                                            );
+                                    <Group gap="xs">
+                                        <Button
+                                            size="xs"
+                                            color="blue"
+                                            variant="light"
+                                            onClick={() => handleOpenPasswordModal(user)}
+                                        >
+                                            Cambiar contraseña
+                                        </Button>
+                                        <Button
+                                            size="xs"
+                                            color={user.isActive ? "red" : "green"}
+                                            variant="light"
+                                            onClick={() => {
+                                                const confirmed = window.confirm(
+                                                    `¿Estás seguro de ${
+                                                        user.isActive ? "desactivar" : "activar"
+                                                    } al usuario ${user.name}?`
+                                                );
 
-                                            if (!confirmed) return;
+                                                if (!confirmed) return;
 
-                                            handleToggleStatus(user._id);
-                                        }}
-                                    >
-                                        {user.isActive ? "Desactivar" : "Activar"}
-                                    </Button>
+                                                handleToggleStatus(user._id);
+                                            }}
+                                        >
+                                            {user.isActive ? "Desactivar" : "Activar"}
+                                        </Button>
+                                    </Group>
                                 </Table.Td>
                             </Table.Tr>
                         ))}
@@ -254,9 +330,17 @@ const UsersPage = () => {
 
                             <Button
                                 fullWidth
-                                color={user.isActive ? "red" : "green"}
+                                color="blue"
                                 variant="light"
                                 mt="sm"
+                                onClick={() => handleOpenPasswordModal(user)}
+                            >
+                                Cambiar contraseña
+                            </Button>
+                            <Button
+                                fullWidth
+                                color={user.isActive ? "red" : "green"}
+                                variant="light"
                                 onClick={() => {
                                     const confirmed = window.confirm(
                                         `¿Estás seguro de ${
