@@ -21,7 +21,7 @@ import {
 import { useAuth } from "../../../app/providers/AuthProvider";
 import { getMyStatsRequest, getLeaderboardRequest, getNextArgentinaMatchRequest, getTodayMatchesRequest } from "../services/dashboard.service";
 import { getCountdown } from "../../../shared/utils/date.utils";
-import { getTeamFlag } from "../../../shared/utils/team.utils";
+import { getTeamFlagUrl } from "../../../shared/utils/team.utils";
 
 const DashboardPage = () => {
     const { user } = useAuth();
@@ -164,9 +164,7 @@ const DashboardPage = () => {
                         <>
                             <Group justify="center" mt="lg">
                                 <Stack align="center" gap={2}>
-                                    <Text size="2rem">
-                                        {getTeamFlag(nextArgentinaMatch.homeTeam)}
-                                    </Text>
+                                    {getTeamFlagUrl(nextArgentinaMatch.homeTeam) && <img src={getTeamFlagUrl(nextArgentinaMatch.homeTeam)} alt={nextArgentinaMatch.homeTeam} width={40} height={27} style={{ objectFit: "cover", border: "1px solid #dee2e6", borderRadius: 2 }} />}
 
                                     <Text fw={700} size="xl">
                                         {nextArgentinaMatch.homeTeam}
@@ -182,9 +180,7 @@ const DashboardPage = () => {
                                 </Text>
 
                                 <Stack align="center" gap={2}>
-                                    <Text size="2rem">
-                                        {getTeamFlag(nextArgentinaMatch.awayTeam)}
-                                    </Text>
+                                    {getTeamFlagUrl(nextArgentinaMatch.awayTeam) && <img src={getTeamFlagUrl(nextArgentinaMatch.awayTeam)} alt={nextArgentinaMatch.awayTeam} width={40} height={27} style={{ objectFit: "cover", border: "1px solid #dee2e6", borderRadius: 2 }} />}
 
                                     <Text fw={700} size="xl">
                                         {nextArgentinaMatch.awayTeam}
@@ -267,10 +263,17 @@ const DashboardPage = () => {
                             {todayMatches.map((match) => (
                                 <Group key={match._id} justify="space-between" align="flex-start">
                                     <Box>
-                                        <Text fw={500}>
-                                            {getTeamFlag(match.homeTeam)} {match.homeTeam} vs{" "}
-                                            {getTeamFlag(match.awayTeam)} {match.awayTeam}
-                                        </Text>
+                                        <Group gap={6} align="center" wrap="wrap">
+                                            <Group gap={4} align="center" wrap="nowrap">
+                                                {getTeamFlagUrl(match.homeTeam) && <img src={getTeamFlagUrl(match.homeTeam)} alt={match.homeTeam} width={24} height={16} style={{ objectFit: "cover", border: "1px solid #dee2e6", borderRadius: 2 }} />}
+                                                <Text fw={500}>{match.homeTeam}</Text>
+                                            </Group>
+                                            <Text c="dimmed" size="sm">vs</Text>
+                                            <Group gap={4} align="center" wrap="nowrap">
+                                                {getTeamFlagUrl(match.awayTeam) && <img src={getTeamFlagUrl(match.awayTeam)} alt={match.awayTeam} width={24} height={16} style={{ objectFit: "cover", border: "1px solid #dee2e6", borderRadius: 2 }} />}
+                                                <Text fw={500}>{match.awayTeam}</Text>
+                                            </Group>
+                                        </Group>
 
                                         <Text size="xs" c="dimmed">
                                             {new Date(match.startDate).toLocaleString("es-AR", {
@@ -313,10 +316,17 @@ const DashboardPage = () => {
                                 {upcomingMatches.map((match) => (
                                     <Group key={match._id} justify="space-between" align="flex-start">
                                     <Box>
-                                        <Text fw={500}>
-                                            {getTeamFlag(match.homeTeam)} {match.homeTeam} vs{" "}
-                                            {getTeamFlag(match.awayTeam)} {match.awayTeam}
-                                        </Text>
+                                        <Group gap={6} align="center" wrap="wrap">
+                                            <Group gap={4} align="center" wrap="nowrap">
+                                                {getTeamFlagUrl(match.homeTeam) && <img src={getTeamFlagUrl(match.homeTeam)} alt={match.homeTeam} width={24} height={16} style={{ objectFit: "cover", border: "1px solid #dee2e6", borderRadius: 2 }} />}
+                                                <Text fw={500}>{match.homeTeam}</Text>
+                                            </Group>
+                                            <Text c="dimmed" size="sm">vs</Text>
+                                            <Group gap={4} align="center" wrap="nowrap">
+                                                {getTeamFlagUrl(match.awayTeam) && <img src={getTeamFlagUrl(match.awayTeam)} alt={match.awayTeam} width={24} height={16} style={{ objectFit: "cover", border: "1px solid #dee2e6", borderRadius: 2 }} />}
+                                                <Text fw={500}>{match.awayTeam}</Text>
+                                            </Group>
+                                        </Group>
 
                                         <Text size="xs" c="dimmed">
                                             {new Date(match.startDate).toLocaleString("es-AR", {

@@ -11,7 +11,7 @@ import {
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 
-import { getTeamFlag } from "../../../shared/utils/team.utils";
+import { getTeamFlagUrl } from "../../../shared/utils/team.utils";
 import { savePredictionRequest } from "../services/matches.service";
 
 const MatchCard = ({ match }) => {
@@ -94,7 +94,7 @@ const MatchCard = ({ match }) => {
             {/* Desktop */}
             <Group visibleFrom="sm" justify="center" align="center" mt="lg">
                 <Stack align="center" gap="xs" style={{ flex: 1 }}>
-                    <Text size="xl">{getTeamFlag(match.homeTeam)}</Text>
+                    {getTeamFlagUrl(match.homeTeam) && <img src={getTeamFlagUrl(match.homeTeam)} alt={match.homeTeam} width={40} height={27} style={{ objectFit: "cover", border: "1px solid #dee2e6", borderRadius: 2 }} />}
                     <Title order={4} ta="center">{match.homeTeam}</Title>
 
                     <NumberInput
@@ -121,7 +121,7 @@ const MatchCard = ({ match }) => {
                 </Stack>
 
                 <Stack align="center" gap="xs" style={{ flex: 1 }}>
-                    <Text size="xl">{getTeamFlag(match.awayTeam)}</Text>
+                    {getTeamFlagUrl(match.awayTeam) && <img src={getTeamFlagUrl(match.awayTeam)} alt={match.awayTeam} width={40} height={27} style={{ objectFit: "cover", border: "1px solid #dee2e6", borderRadius: 2 }} />}
                     <Title order={4} ta="center">{match.awayTeam}</Title>
 
                     <NumberInput
@@ -138,7 +138,7 @@ const MatchCard = ({ match }) => {
             {/* Mobile */}
             <Stack hiddenFrom="sm" align="center" mt="md" gap="sm">
                 <Stack align="center" gap="xs">
-                    <Text size="xl">{getTeamFlag(match.homeTeam)}</Text>
+                    {getTeamFlagUrl(match.homeTeam) && <img src={getTeamFlagUrl(match.homeTeam)} alt={match.homeTeam} width={40} height={27} style={{ objectFit: "cover", border: "1px solid #dee2e6", borderRadius: 2 }} />}
                     <Title order={4} ta="center">{match.homeTeam}</Title>
 
                     <NumberInput
@@ -154,7 +154,7 @@ const MatchCard = ({ match }) => {
                 <Text fw={900} size="xl">VS</Text>
 
                 <Stack align="center" gap={4}>
-                    <Text size="xl">{getTeamFlag(match.awayTeam)}</Text>
+                    {getTeamFlagUrl(match.awayTeam) && <img src={getTeamFlagUrl(match.awayTeam)} alt={match.awayTeam} width={40} height={27} style={{ objectFit: "cover", border: "1px solid #dee2e6", borderRadius: 2 }} />}
                     <Title order={4} ta="center">{match.awayTeam}</Title>
 
                     <NumberInput
